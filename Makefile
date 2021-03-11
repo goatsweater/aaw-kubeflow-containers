@@ -5,7 +5,7 @@
 # just builds target dockerfiles by combining the dockerbits.
 
 # The docker-stacks tag
-COMMIT := 42f4c82a07ff
+COMMIT := r-4.0.3
 
 Tensorflow-CUDA := 11.1
 PyTorch-CUDA    := 11.0
@@ -26,7 +26,7 @@ clean:
 .output:
 	mkdir -p $(OUT)/ $(TMP)/
 
-all: JupyterLab RStudio
+all: JupyterLab RStudio RemoteDesktop
 	@echo "All dockerfiles created."
 
 build:
@@ -63,17 +63,9 @@ PyTorch Tensorflow: .output
 		$(SRC)/1_CUDA-$($(@)-CUDA).Dockerfile \
 		$(SRC)/2_$@.Dockerfile \
 	> $(TMP)/$@.Dockerfile
-	# use 0_CPU-OL-compliant docker-bit to create JupyterLab-OL images, temporary until we want to replace our JupyterLab images with the OL compliant ones
-	$(CAT) \
-		$(SRC)/0_CPU-$(OL).Dockerfile \
-		$(SRC)/1_CUDA-$($(@)-CUDA).Dockerfile \
-		$(SRC)/2_$@.Dockerfile \
-	> $(TMP)/$@-$(OL).Dockerfile
 
 CPU: .output
 	$(CAT) $(SRC)/0_$@.Dockerfile > $(TMP)/$@.Dockerfile
-	# temporary until we want to replace our JupyterLab images with the OL compliant ones
-	$(CAT) $(SRC)/0_$@-$(OL).Dockerfile > $(TMP)/$@-$(OL).Dockerfile
 
 ################################
 ###    R-Studio & Jupyter    ###
@@ -82,7 +74,7 @@ CPU: .output
 # Only one output version
 RStudio: CPU
 	mkdir -p $(OUT)/$@
-	cp -r resources/* $(OUT)/$@
+	cp -r resources/common/* $(OUT)/$@
 
 	$(CAT) \
 		$(TMP)/$<.Dockerfile \
@@ -93,13 +85,13 @@ RStudio: CPU
 		$(SRC)/∞_CMD.Dockerfile \
 	>   $(OUT)/$@/Dockerfile
 
-# create directories for current images and OL-compliant/JupyterLab3 images
+# create directories for current images and OL-compliant images
 # create OL images with OL-compliant docker-bits, temporary until we want to replace our JupyterLab images with the OL compliant ones
 JupyterLab: PyTorch Tensorflow CPU 
 	
 	for type in $^; do \
 		mkdir -p $(OUT)/$@-$${type}; \
-		cp -r resources/* $(OUT)/$@-$${type}/; \
+		cp -r resources/common/* $(OUT)/$@-$${type}/; \
 		$(CAT) \
 			$(TMP)/$${type}.Dockerfile \
 			$(SRC)/3_Kubeflow.Dockerfile \
@@ -109,13 +101,29 @@ JupyterLab: PyTorch Tensorflow CPU
 			$(SRC)/∞_CMD.Dockerfile \
 		>   $(OUT)/$@-$${type}/Dockerfile; \
 		mkdir -p $(OUT)/$@-$${type}-$(OL); \
-		cp -r resources/* $(OUT)/$@-$${type}-$(OL)/; \
+		cp -r resources/common/* $(OUT)/$@-$${type}-$(OL)/; \
 		$(CAT) \
-			$(TMP)/$${type}-$(OL).Dockerfile \
+			$(TMP)/$${type}.Dockerfile \
 			$(SRC)/3_Kubeflow.Dockerfile \
 			$(SRC)/4_CLI.Dockerfile \
 			$(SRC)/5_DB-Drivers.Dockerfile \
 			$(SRC)/6_$(@)-$(OL).Dockerfile \
 			$(SRC)/∞_CMD.Dockerfile \
 		>   $(OUT)/$@-$${type}-$(OL)/Dockerfile; \
-	done	
+	done
+
+# Remote Desktop
+RemoteDesktop:
+	mkdir -p $(OUT)/$@
+	echo "REMOTE DESKTOP"
+	cp -r scripts/remote-desktop $(OUT)/$@
+	cp -r resources/common/* $(OUT)/$@
+	cp -r resources/remote-desktop/* $(OUT)/$@
+
+	$(CAT) \
+		$(SRC)/0_Rocker.Dockerfile \
+		$(SRC)/3_Kubeflow.Dockerfile \
+		$(SRC)/4_CLI.Dockerfile \
+		$(SRC)/6_RemoteDesktop.Dockerfile \
+		$(SRC)/∞_CMD_RemoteDesktop.Dockerfile \
+	>   $(OUT)/$@/Dockerfile
