@@ -4,7 +4,7 @@
 # All the content is in `docker-bits`; this Makefile
 # just builds target dockerfiles by combining the dockerbits.
 #
-# Management of build, pull/push, and testing is modified from 
+# Management of build, pull/push, and testing is modified from
 # https://github.com/jupyter/docker-stacks
 
 # The docker-stacks tag
@@ -103,12 +103,13 @@ rstudio: cpu
 		$(SRC)/4_CLI.Dockerfile \
 		$(SRC)/5_DB-Drivers.Dockerfile \
 		$(SRC)/6_$(@).Dockerfile \
+		$(SRC)/7_webscraping.Dockerfile \
 		$(SRC)/∞_CMD.Dockerfile \
 	>   $(OUT)/$@/Dockerfile
 
 # create directories for current images
-jupyterlab: pytorch tensorflow cpu 
-	
+jupyterlab: pytorch tensorflow cpu
+
 	for type in $^; do \
 		mkdir -p $(OUT)/$@-$${type}; \
 		cp -r resources/common/* $(OUT)/$@-$${type}/; \
@@ -118,6 +119,7 @@ jupyterlab: pytorch tensorflow cpu
 			$(SRC)/4_CLI.Dockerfile \
 			$(SRC)/5_DB-Drivers.Dockerfile \
 			$(SRC)/6_$(@).Dockerfile \
+			$(SRC)/7_webscraping.Dockerfile \
 			$(SRC)/∞_CMD.Dockerfile \
 		>   $(OUT)/$@-$${type}/Dockerfile; \
 	done
@@ -135,6 +137,7 @@ remote-desktop:
 		$(SRC)/3_Kubeflow.Dockerfile \
 		$(SRC)/4_CLI.Dockerfile \
 		$(SRC)/6_remote-desktop.Dockerfile \
+		$(SRC)/7_webscraping.Dockerfile \
 		$(SRC)/∞_CMD_remote-desktop.Dockerfile \
 	>   $(OUT)/$@/Dockerfile
 

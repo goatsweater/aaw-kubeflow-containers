@@ -16,8 +16,8 @@ if [ ! -f /home/$NB_USER/.zsh-installed ]; then
       conda init bash
       conda init zsh
     fi
-    cat /tmp/shell_helpers.sh >> /home/$NB_USER/.bashrc 
-    cat /tmp/shell_helpers.sh >> /home/$NB_USER/.zshrc    
+    cat /tmp/shell_helpers.sh >> /home/$NB_USER/.bashrc
+    cat /tmp/shell_helpers.sh >> /home/$NB_USER/.zshrc
     touch /home/$NB_USER/.zsh-installed
 fi
 
