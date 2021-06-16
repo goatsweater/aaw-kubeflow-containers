@@ -16,8 +16,8 @@ if [ ! -f /home/$NB_USER/.zsh-installed ]; then
       conda init bash
       conda init zsh
     fi
-    cat /tmp/shell_helpers.sh >> /home/$NB_USER/.bashrc 
-    cat /tmp/shell_helpers.sh >> /home/$NB_USER/.zshrc    
+    cat /tmp/shell_helpers.sh >> /home/$NB_USER/.bashrc
+    cat /tmp/shell_helpers.sh >> /home/$NB_USER/.zshrc
     touch /home/$NB_USER/.zsh-installed
 fi
 
@@ -69,7 +69,7 @@ if [ -f "$NOTEBOOK_CONFIG" ]; then
       && mv -f "$NOTEBOOK_CONFIG_TMP" "$NOTEBOOK_CONFIG"
 fi
 
-jupyter server --notebook-dir=/home/${NB_USER} \
+/opt/conda/bin/jupyter server --notebook-dir=/home/${NB_USER} \
                  --ip=0.0.0.0 \
                  --no-browser \
                  --port=8888 \
